@@ -60,25 +60,37 @@ app.get("/", async (req, res, next) => {
 // create user
 app.post("/", upload.single("avatar"), async (req, res, next) => {
   const { id, name, dayOfBirth, className } = req.body;
-
+  const avatar = req.file?.location;
   const object = await getById(id);
   if (object) {
     const students = await getAll();
     res.render("index", {
       result: { students: students || [], errors: ["id already exists "] },
     });
+    await deleteFileS3ByLink(avatar);
     return;
   }
-  const avatar = req.file?.location;
+
   await addObject({ id, name, dayOfBirth, className, avatar });
   res.redirect("/");
 });
 
-app.post("/students/update", async (req, res, next) => {
-  const { id, name, dayOfBirth, className } = req.body;
-  await addObject({ id, name, dayOfBirth, className });
-  res.redirect("/");
-});
+app.post(
+  "/students/update",
+  upload.single("avatar"),
+  async (req, res, next) => {
+    const { id, name, dayOfBirth, className } = req.body;
+    let avatar = req.file?.location;
+    const object = await getById(id);
+    if (avatar && object && object.avatar) {
+      await deleteFileS3ByLink(object.avatar);
+    } else {
+      avatar = object.avatar;
+    }
+    await addObject({ id, name, dayOfBirth, className, avatar });
+    res.redirect("/");
+  }
+);
 // get by ID
 app.get("/students/update/:id", async (req, res, next) => {
   const { id } = req.params;
