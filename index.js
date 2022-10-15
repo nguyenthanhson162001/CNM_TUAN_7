@@ -28,6 +28,7 @@ const dynamoDB = new AWS.DynamoDB.DocumentClient();
 // config S3
 var s3 = new AWS.S3();
 const bucketsName = process.env.AWS_BUCKETS_S3_NAME;
+
 const s3Client = new S3Client({
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -121,8 +122,6 @@ app.post("/students/delete/:id", async (req, res, next) => {
   res.redirect("/");
 });
 
-app.listen(port, () => console.log(`Server start on http://localhost:${port}`));
-
 // service
 const addObject = async (entity) => {
   const params = {
@@ -177,3 +176,5 @@ const deleteFileS3ByLink = async (linkFile) => {
     console.log(error);
   }
 };
+
+app.listen(port, () => console.log(`Server start on http://localhost:${port}`));
